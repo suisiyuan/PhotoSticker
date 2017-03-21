@@ -1,19 +1,25 @@
-#ifndef WIDGET_H
-#define WIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <QDir>
 #include <QFileDialog>
-#include <QTextStream>
 #include <QDebug>
 #include <QImage>
 #include <QPainter>
+#include <QMessageBox>
 
+#include <QAxObject>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include "qrencode.h"
+
+#define QRCode_Width    300
 
 typedef struct
 {
-    quint16	order;
+    qint32	order;
     QString IMEI, SN;
+    QImage qrCode;
 }DataItem;
 
 
@@ -31,26 +37,17 @@ public:
 
 
 private slots:
-    void on_dataButton_clicked();
-
-    void on_codeButton_clicked();
-
+    void on_excelButton_clicked();
     void on_smallImageButton_clicked();
-
-    void on_bigImageButton_clicked();
-
     void on_outputButton_clicked();
-
     void on_generateButton_clicked();
 
 private:
     Ui::Widget *ui;
 
-    QVector<DataItem> dataItems;
+    QAxObject *pExcel, *pWorkbooks, *pWorkbook, *pWorksheet;
 
-    void processSmallImage(const QImage &orgImage, QDir outputDir, QFileInfo fileInfo);
-    void processBigImage(const QImage &orgImage, QDir outputDir, QFileInfo fileInfo);
+    void processSmallImage(const QImage &orgImage, DataItem dataItem, QDir outputDir);
 
 };
 
-#endif // WIDGET_H
