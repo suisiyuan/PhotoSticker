@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     QString locale = QLocale::system().name();
     QTranslator translator;
-    bool result = translator.load(QString(":/PhotoSticker_") + locale);
+    translator.load(QString(":/PhotoSticker_") + locale);
     a.installTranslator(&translator);
 
     Widget w;

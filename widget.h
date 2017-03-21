@@ -13,6 +13,8 @@
 #include <QJsonDocument>
 #include "qrencode.h"
 
+#include "app.h"
+
 #define QRCode_Width    300
 
 typedef struct

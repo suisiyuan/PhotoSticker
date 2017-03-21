@@ -7,6 +7,8 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->versionLabel->setText(tr("Version: ") + App_Version);
+
     // Excel COM
     pExcel = new QAxObject("Excel.Application");
     if (!pExcel)

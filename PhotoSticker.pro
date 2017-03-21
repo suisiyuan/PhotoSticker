@@ -48,7 +48,8 @@ HEADERS  += widget.h \
     3rd/qrinput.h \
     3rd/qrspec.h \
     3rd/rscode.h \
-    3rd/split.h
+    3rd/split.h \
+    app.h
 
 FORMS    += widget.ui
 
