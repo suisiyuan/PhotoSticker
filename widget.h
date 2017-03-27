@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QPainter>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <QAxObject>
 #include <QJsonObject>
@@ -38,16 +39,21 @@ public:
     ~Widget();
 
 
+
 private slots:
     void on_excelButton_clicked();
-    void on_smallImageButton_clicked();
+//    void on_smallImageButton_clicked();
     void on_outputButton_clicked();
     void on_generateButton_clicked();
+
+    void on_singleGenerateButton_clicked();
+    void on_saveButton_clicked();
 
 private:
     Ui::Widget *ui;
 
     QAxObject *pExcel, *pWorkbooks, *pWorkbook, *pWorksheet;
+    QSettings settings;
 
     void processSmallImage(const QImage &orgImage, DataItem dataItem, QDir outputDir);
 

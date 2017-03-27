@@ -3,12 +3,63 @@
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Widget)
+    ui(new Ui::Widget),
+    pExcel(Q_NULLPTR)
 {
     ui->setupUi(this);
 
-    ui->versionLabel->setText(tr("Version: ") + App_Version);
+    ui->versionLabel->setText(tr("Version: ") + QCoreApplication::applicationVersion());
 
+    // settings
+    if (!settings.contains("lastExcelPath"))
+        settings.setValue("lastExcelPath", QDir::currentPath());
+    if (!settings.contains("lastSaveFilePath"))
+        settings.setValue("lastSaveFilePath", QDir::currentPath());
+    if (!settings.contains("lastSaveFolderPath"))
+        settings.setValue("lastSaveFolderPath", QDir::currentPath());
+}
+
+Widget::~Widget()
+{
+    delete ui;
+
+    if(pExcel)
+    {
+        pExcel->dynamicCall("Quit()");
+        delete pExcel;
+    }
+
+}
+
+
+void Widget::on_excelButton_clicked()
+{
+    QString path = settings.value("lastExcelPath").toString();
+
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Get excel file"), path, tr("Excel File (*.xlsx *.xls)"));
+    ui->excelEdit->setText(filePath);
+}
+
+
+//void Widget::on_smallImageButton_clicked()
+//{
+//    QString filePath = QFileDialog::getOpenFileName(this, tr("Get image"), QDir::homePath(), tr("Image file (*.jpg *.png)"));
+//    ui->smallImageEdit->setText(filePath);
+//}
+
+
+void Widget::on_outputButton_clicked()
+{
+    QString path = settings.value("lastSaveFolderPath").toString();
+
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Get output folder"), path);
+    ui->outputEdit->setText(folderPath);
+}
+
+
+
+void Widget::on_generateButton_clicked()
+{   
     // Excel COM
     pExcel = new QAxObject("Excel.Application");
     if (!pExcel)
@@ -16,41 +67,8 @@ Widget::Widget(QWidget *parent) :
     else
         qDebug() << "Excel initializes successfully, version" + pExcel->property("Version").toString() + ".";
     pWorkbooks = pExcel->querySubObject("WorkBooks");
-}
-
-Widget::~Widget()
-{
-    delete ui;
-
-    pExcel->dynamicCall("Quit()");
-    delete pExcel;
-}
 
 
-void Widget::on_excelButton_clicked()
-{
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Get excel file"), QDir::homePath(), tr("Excel File (*.xlsx *.xls)"));
-    ui->excelEdit->setText(filePath);
-}
-
-
-void Widget::on_smallImageButton_clicked()
-{
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Get image"), QDir::homePath(), tr("Image file (*.jpg *.png)"));
-    ui->smallImageEdit->setText(filePath);
-}
-
-
-void Widget::on_outputButton_clicked()
-{
-    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Get output folder"), QDir::homePath());
-    ui->outputEdit->setText(folderPath);
-}
-
-
-
-void Widget::on_generateButton_clicked()
-{
     ui->progressBar->setValue(0);
 
     // excel
@@ -59,13 +77,16 @@ void Widget::on_generateButton_clicked()
     else if (!QFile(ui->excelEdit->text()).exists())
         return;
 
+    // settings
+    settings.setValue("lastExcelPath", QFileInfo(ui->excelEdit->text()).dir().path());
+    settings.setValue("lastSaveFolderPath", ui->outputEdit->text());
 
     // small image
-    if (ui->smallImageEdit->text().isEmpty())
-        return;
-    else if (!QFile(ui->smallImageEdit->text()).exists())
-        return;
-    QImage smallImage(ui->smallImageEdit->text());
+//    if (ui->smallImageEdit->text().isEmpty())
+//        return;
+//    else if (!QFile(ui->smallImageEdit->text()).exists())
+//        return;
+    QImage smallImage(":/res/images/image.png");
     QPainter painter(&smallImage);
     QPen pen(QBrush(Qt::black), 2);
     painter.setPen(pen);
@@ -144,62 +165,6 @@ void Widget::on_generateButton_clicked()
     messageBox.exec();
 
     ui->generateButton->setEnabled(true);
-
-
-//    if (ui->dataEdit->text().isEmpty())
-//    {
-//        return;
-//    }
-//    else
-//    {
-//        QFile file(ui->dataEdit->text());
-//        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-//            return;
-//        QTextStream stream(&file);
-//        while (!stream.atEnd())
-//        {
-//            QString line = stream.readLine();
-//            QTextStream in(&line);
-//            DataItem item = { 0, "", "" };
-//            in >> item.order >> item.IMEI >> item.SN;
-//            dataItems.append(item);
-//        }
-//        file.close();
-//    }
-
-
-
-//    ui->generateButton->setDisabled(true);
-
-
-
-//    QImage smallImage(ui->smallImageEdit->text());
-
-//    QPainter painter(&smallImage);
-//    QPen pen(QBrush(Qt::black), 2);
-//    painter.setPen(pen);
-
-//    QRect rect(smallImage.rect());
-//    rect = rect.marginsRemoved(QMargins(1, 1, 1, 1));
-//    painter.drawRect(rect);
-
-//    //QImage bigImage(ui->bigImageEdit->text());
-
-//    QDir outputDir(ui->outputEdit->text());
-//    outputDir.mkdir("1");
-//    outputDir.mkdir("2");
-
-//    QFileInfoList fileList = codeDir.entryInfoList(QDir::Files, QDir::Name);
-
-//    for (int i = 0; i < fileList.count(); i++)
-//    {
-//        processSmallImage(smallImage, outputDir, fileList.at(i));
-//        //processBigImage(bigImage, outputDir, fileList.at(i));
-//        ui->progressBar->setValue(ui->progressBar->value() + 1);
-//    }
-
-
-//    ui->generateButton->setEnabled(true);
 }
 
 
@@ -224,28 +189,87 @@ void Widget::processSmallImage(const QImage &orgImage, DataItem dataItem, QDir o
     outputImage.save(outputDir.filePath(dataItem.SN + "-" + dataItem.IMEI + ".jpg"), "JPG");
 }
 
-//void Widget::processBigImage(const QImage &orgImage, QDir outputDir, QFileInfo fileInfo)
-//{
-//    QString name = fileInfo.baseName();
-//    quint32 index = name.remove(".jpg").toUInt();
-//    DataItem dataItem = dataItems.at(index-1);
 
-//    QImage outputImage(orgImage);
-//    QImage image(fileInfo.absoluteFilePath());
+void Widget::on_singleGenerateButton_clicked()
+{
+    if (ui->IMEIEdit->text().isEmpty() || ui->SNEdit->text().isEmpty())
+        return;
+
+    DataItem dataItem;
+    dataItem.order = 0;
+    dataItem.IMEI = ui->IMEIEdit->text();
+    dataItem.SN = ui->SNEdit->text();
+
+    QJsonObject json;
+    json.insert("IMEI", dataItem.IMEI);
+
+    QRcode *qrCode;
+    QString encodeStr = QJsonDocument(json).toJson();
+    qrCode = QRcode_encodeString(encodeStr.toStdString().c_str(), 0, QR_ECLEVEL_Q, QR_MODE_8, 1);
+    qreal ratio = QRCode_Width / qrCode->width;
+
+    dataItem.qrCode = QImage(QRCode_Width, QRCode_Width, QImage::Format_RGB888);
+    QPainter painter(&dataItem.qrCode);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QBrush(Qt::white));
+    painter.drawRect(0, 0, QRCode_Width, QRCode_Width);
+    painter.setBrush(QBrush(Qt::black));
+
+    for (qint32 i = 0; i < qrCode->width; i++)
+        for (qint32 j = 0; j < qrCode->width; j++)
+            if (qrCode->data[i*qrCode->width+j] & 0x01)
+            {
+                QRectF rect(i*ratio, j*ratio, ratio, ratio);
+                painter.drawRect(rect);
+            }
+    free(qrCode->data);
+    painter.end();
 
 
-//    QPainter painter(&outputImage);
-//    painter.drawImage(QRect(720, 255, 350, 350), image);
-//    painter.setFont(QFont("黑体", 25, QFont::Normal, false));
-//    painter.drawText(QPoint(837, 636), dataItem.IMEI);
-//    painter.setFont(QFont("黑体", 25, QFont::Normal, false));
-//    painter.drawText(QPoint(770, 677), dataItem.SN);
+    QImage outputImage(":/res/images/image.png");
 
-//    outputImage.setDotsPerMeterX(11816);
-//    outputImage.setDotsPerMeterY(11816);
+    QPainter painter1(&outputImage);
+    QPen pen(QBrush(Qt::black), 2);
+    painter1.setPen(pen);
+    QRect rect(outputImage.rect());
+    rect = rect.marginsRemoved(QMargins(1, 1, 1, 1));
+    painter1.drawRect(rect);
 
-//    outputImage.save(QDir(outputDir.filePath("2")).filePath(dataItem.SN + "-" + dataItem.IMEI + ".jpg"), "JPG");
-//}
+    outputImage.setDotsPerMeterX(3780);
+    outputImage.setDotsPerMeterY(3780);
+
+    painter1.drawImage(QRect(9, 11, 160, 160), dataItem.qrCode);
+    painter1.setFont(QFont("黑体", 16, QFont::Normal, false));
+    painter1.drawText(QPoint(236, 30), dataItem.IMEI);
+    painter1.setFont(QFont("黑体", 12, QFont::Normal, false));
+    painter1.drawText(QPoint(240, 168), QString("SN:") + dataItem.SN);
+
+    outputImage.setDotsPerMeterX(11816);
+    outputImage.setDotsPerMeterY(11816);
+
+    ui->imageLabel->setPixmap(QPixmap::fromImage(outputImage));
+    ui->saveButton->setEnabled(true);
+}
+
+void Widget::on_saveButton_clicked()
+{
+    QString path = settings.value("lastSaveFilePath").toString();
+
+    QImage image = ui->imageLabel->pixmap()->toImage();
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Save image"),
+                                                    QDir(path).filePath(ui->SNEdit->text()+"-"+ui->IMEIEdit->text()),
+                                                    tr("Images files (*.jpg)"));
+    if (filePath.isEmpty())
+        return;
+
+    settings.setValue("lastSaveFilePath", QFileInfo(filePath).dir().path());
 
 
+    if (!image.save(filePath, "JPG"))
+        return;
 
+    ui->IMEIEdit->clear();
+    ui->SNEdit->clear();
+    ui->imageLabel->clear();
+    ui->saveButton->setEnabled(false);
+}
