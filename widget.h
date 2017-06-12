@@ -16,13 +16,15 @@
 
 #include "app.h"
 
+#include "zint.h"
+
 #define QRCode_Width    300
 
 typedef struct
 {
     qint32	order;
     QString IMEI, SN;
-    QImage qrCode;
+    QImage qrCode, barCode;
 }DataItem;
 
 
@@ -48,6 +50,8 @@ private slots:
 
     void on_singleGenerateButton_clicked();
     void on_saveButton_clicked();
+
+    void on_switchButton_clicked();
 
 private:
     Ui::Widget *ui;

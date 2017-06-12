@@ -2,6 +2,6 @@
     <qresource prefix="/">
         <file>PhotoSticker_zh_CN.qm</file>
         <file>res/images/icon.ico</file>
-        <file>res/images/image.png</file>
+        <file>res/images/image.jpg</file>
     </qresource>
 </RCC>

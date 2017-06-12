@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
-    <height>252</height>
+    <width>658</width>
+    <height>272</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -15,18 +15,6 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>0</width>
-    <height>252</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>16777215</width>
-    <height>252</height>
-   </size>
   </property>
   <property name="font">
    <font>
@@ -77,56 +65,100 @@
       <attribute name="title">
        <string>二维码生成</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0" colspan="2">
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="2" rowspan="2">
-          <widget class="QLabel" name="imageLabel">
-           <property name="minimumSize">
-            <size>
-             <width>300</width>
-             <height>120</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>300</width>
-             <height>120</height>
-            </size>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="scaledContents">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="SNEdit"/>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="IMEILabel">
-           <property name="text">
-            <string>IMEI:</string>
-           </property>
-          </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0" colspan="2">
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="IMEILabel">
+             <property name="text">
+              <string>IMEI:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="IMEIEdit"/>
+           </item>
+           <item row="0" column="2" rowspan="2">
+            <widget class="QStackedWidget" name="stackedWidget">
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <widget class="QWidget" name="page_image1">
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QLabel" name="image1Label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>120</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>300</width>
+                   <height>120</height>
+                  </size>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::Box</enum>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="page_image2">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLabel" name="image2Label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>120</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>300</width>
+                   <height>120</height>
+                  </size>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::Box</enum>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="SNLabel">
+             <property name="text">
+              <string>SN：</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="SNEdit"/>
+           </item>
+          </layout>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="SNLabel">
-           <property name="text">
-            <string>SN：</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="IMEIEdit"/>
-         </item>
-         <item row="2" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QPushButton" name="singleGenerateButton">
              <property name="text">
@@ -144,16 +176,36 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="switchButton">
+             <property name="text">
+              <string> 切换</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
-         <item row="2" column="2">
-          <widget class="QLabel" name="infoLabel">
-           <property name="text">
-            <string/>
+         <item row="1" column="1">
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-          </widget>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="infoLabel">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
