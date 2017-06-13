@@ -213,14 +213,16 @@ void Widget::on_generateButton_clicked()
     painter.drawRect(rect);
 
 
-    // output directory
+    // 输出文件夹
     QDir dir(ui->outputEdit->text());
     if (ui->outputEdit->text().isEmpty())
         return;
     else if (!dir.exists())
         dir.mkpath(dir.path());
 
-
+    // 分为有设备号和有条形码的文件夹
+    dir.mkdir(dir.filePath(tr("Device number")));
+    dir.mkdir(dir.filePath(tr("Barcode")));
 
     if (!pExcel)
         return;
@@ -237,8 +239,6 @@ void Widget::on_generateButton_clicked()
         return;
 
     ui->progressBar->setMaximum(varRows.count() - 2);
-
-
     ui->generateButton->setEnabled(false);
 
     for (qint32 i = 2; i < varRows.count(); i++)
@@ -248,32 +248,12 @@ void Widget::on_generateButton_clicked()
         dataItem.order = dataList.at(0).toInt();
         dataItem.IMEI = dataList.at(1);
         dataItem.SN = dataList.at(2);
+        dataItem.qrCode = encodeQRCode(dataItem.IMEI);
+        dataItem.barCode = encodeBarCode(dataItem.SN);
 
-        QJsonObject json;
-        json.insert("IMEI", dataItem.IMEI);
+        generateImage1(dataItem).save(QDir(dir.filePath(tr("Device number"))).filePath(dataItem.SN + "-" + dataItem.IMEI + ".jpg"), "JPG");
+        generateImage2(dataItem).save(QDir(dir.filePath(tr("Barcode"))).filePath(dataItem.SN + "-" + dataItem.IMEI + ".jpg"), "JPG");
 
-        QRcode *qrCode;
-        QString encodeStr = QJsonDocument(json).toJson();
-        qrCode = QRcode_encodeString(encodeStr.toStdString().c_str(), 0, QR_ECLEVEL_Q, QR_MODE_8, 1);
-        qreal ratio = QRCode_Width / qrCode->width;
-
-        dataItem.qrCode = QImage(QRCode_Width, QRCode_Width, QImage::Format_RGB888);
-        QPainter painter(&dataItem.qrCode);
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QBrush(Qt::white));
-        painter.drawRect(0, 0, QRCode_Width, QRCode_Width);
-        painter.setBrush(QBrush(Qt::black));
-
-        for (qint32 i = 0; i < qrCode->width; i++)
-            for (qint32 j = 0; j < qrCode->width; j++)
-                if (qrCode->data[i*qrCode->width+j] & 0x01)
-                {
-                    QRectF rect(i*ratio, j*ratio, ratio, ratio);
-                    painter.drawRect(rect);
-                }
-        free(qrCode->data);
-
-        processSmallImage(smallImage, dataItem, dir);
         ui->progressBar->setValue(i-1);
     }
 
@@ -285,27 +265,6 @@ void Widget::on_generateButton_clicked()
     ui->generateButton->setEnabled(true);
 }
 
-
-void Widget::processSmallImage(const QImage &orgImage, DataItem dataItem, QDir outputDir)
-{
-    QImage outputImage(orgImage);
-
-    outputImage.setDotsPerMeterX(3780);
-    outputImage.setDotsPerMeterY(3780);
-
-    QPainter painter(&outputImage);
-    painter.drawImage(QRect(9, 11, 160, 160), dataItem.qrCode);
-    painter.setFont(QFont("黑体", 16, QFont::Normal, false));
-    painter.drawText(QPoint(236, 30), dataItem.IMEI);
-    painter.setFont(QFont("黑体", 12, QFont::Normal, false));
-    painter.drawText(QPoint(240, 168), QString("SN:") + dataItem.SN);
-
-
-    outputImage.setDotsPerMeterX(11816);
-    outputImage.setDotsPerMeterY(11816);
-
-    outputImage.save(outputDir.filePath(dataItem.SN + "-" + dataItem.IMEI + ".jpg"), "JPG");
-}
 
 
 void Widget::on_singleGenerateButton_clicked()
